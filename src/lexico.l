@@ -1,9 +1,12 @@
 %{
 // includes, tipos (c++)
+// #include <FlexLexer.h>
 #include <iostream>
 using std::cin, std::cout, std::endl;
 %}
+
 %option noyywrap
+
 spc                 [ ]
 nline               \n
 tab                 \t
@@ -18,7 +21,9 @@ comment_begin       \(\*
 comment_body        {c}|\*+{cl}
 comment_end         \*+\)
 comment             {comment_begin}{comment_body}*{comment_end}
+
 %%
+
 {spc}		        cout << YYText() << " -> spc" << endl;
 {nline}		        cout << YYText() << " -> nline" << endl;
 {tab}		        cout << YYText() << " -> tab" << endl;
@@ -34,8 +39,12 @@ comment             {comment_begin}{comment_body}*{comment_end}
 {comment_end}		cout << YYText() << " -> comment_end" << endl;
 {comment}		    cout << YYText() << " -> comment" << endl;
 .                   cout << YYText() << " -> token indefinido" << endl;
+
 %%
-main() {
+
+int main() {
     yyFlexLexer lexer;
     lexer.yylex();
+
+    return 0;
 }

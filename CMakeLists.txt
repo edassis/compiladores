@@ -7,10 +7,10 @@ project(Compiladores)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 file(GLOB src_files ${PROJECT_SOURCE_DIR}/src/*)
 
-# cmake_print_variables(PROJECT_SOURCE_DIR)
 cmake_print_variables(src_files)
 # cmake_print_variables(INCLUDE_DIRECTORIES)
 
