@@ -19,7 +19,7 @@ add_executable(a ${src_files})
 # Configuração do Flex
 # cmake_policy(SET CMP0098 NEW)
 find_package(FLEX)
-FLEX_TARGET(MyScanner ${CMAKE_CURRENT_SOURCE_DIR}/src/lexico.l ${CMAKE_CURRENT_BINARY_DIR}/lexico.cpp COMPILE_FLAGS "-+")
+FLEX_TARGET(MyScanner ${CMAKE_CURRENT_SOURCE_DIR}/src/lexico.l ${CMAKE_CURRENT_BINARY_DIR}/lexico.yy.cc COMPILE_FLAGS "-+")
 # FLEX_TARGET(MyScanner ${CMAKE_CURRENT_SOURCE_DIR}/src/lexico.l)
 
 # target_sources(MyScanner PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
