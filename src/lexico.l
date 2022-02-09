@@ -12,7 +12,7 @@ letra               [a-zA-Z]
 digito              [0-9]
 alpha               {letra}|{digito}
 id                  (_|{letra})(_|{alpha})*
-num                 (\+|\-)?{digito}+(\.{digito}+)?
+num                 (\+|\-)?{digito}+(\.{digito}*)?
 comment_begin       \(\*
 comment_body        [^\*]|\*+[^\*\)]
 comment_end         \*+\)
