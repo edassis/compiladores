@@ -1,30 +1,25 @@
 %{
-// includes, tipos (c++)
-// #include <FlexLexer.h>
+// #include <FlexLexer.h>       // already included by flex
 #include <iostream>
 using std::cin, std::cout, std::endl;
 %}
+  /* Definition */
 
+/* Read only one file as input */
 %option noyywrap
 
-spc                 [ ]
-nline               \n
-tab                 \t
 letra               [a-zA-Z]
 digito              [0-9]
 alpha               {letra}|{digito}
-id	                {letra}{alpha}*
+id                  {letra}{alpha}*
 num                 \-?{digito}+(\.{digito}+)?
 comment_begin       \(\*
-comment_body        ([^\*]|\*+[^\)])*(\n)*
+comment_body        [^\*]|\*+[^\*\)]
 comment_end         \*+\)
-comment             {comment_begin}{comment_body}{comment_end}
+comment             {comment_begin}{comment_body}*{comment_end}
 
 %%
-
-{spc}               cout << YYText() << "-> spc" << endl;
-{nline}             cout << YYText() << "-> nline" << endl;
-{tab}               cout << YYText() << "-> tab" << endl;
+  /* Rules */
 {letra}             cout << YYText() << "-> letra" << endl;
 {digito}            cout << YYText() << "-> digito" << endl;
 {alpha}             cout << YYText() << "-> alpha" << endl;
@@ -34,10 +29,11 @@ comment             {comment_begin}{comment_body}{comment_end}
 {comment_body}      cout << YYText() << "-> comment_body" << endl;
 {comment_end}       cout << YYText() << "-> comment_end" << endl;
 {comment}           cout << YYText() << "-> comment" << endl;
+[ \t\n\r]           /* skip whitespace */
 .                   cout << YYText() << "-> token indefinido" << endl;
 
 %%
-
+  /* User's  code */
 int main() {
     yyFlexLexer lexer;
     lexer.yylex();
