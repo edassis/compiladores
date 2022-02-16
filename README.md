@@ -20,5 +20,5 @@ $ ./a < tests/<chose one>.txt
 
 ## Dependencies
 - GCC 7.3 or greater;
-- CMAKE 3.20 or greater;
+- CMAKE 3.16.3 or greater;
 - Flex.
