@@ -1,0 +1,5 @@
+int primeiro = 1
+int segundo=2
+
+int soma = 3 + 5
+int subf = 7.2 - 1.1
