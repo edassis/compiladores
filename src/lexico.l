@@ -10,6 +10,7 @@ using std::cin, std::cout, std::endl;
 
 unary_op                    \+|\-
 add_op                      \+|\-
+mult_op                     \*|\/
 assig_op                    \=
 
 tipo                        "int"|"float"
@@ -17,8 +18,9 @@ id                          [[:alpha:]_]|[[:alnum:]_]*
 num                         [[:digit:]]+(\.[[:digit:]]*)?
 
 var                         {tipo}[ ]+{id}[ ]*{assig_op}[ ]*{expression}
-expression                  {unary_expression}|{additive_expression}
-additive_expression         {unary_expression}([ ]*{add_op}[ ]*{unary_expression})+
+expression                  {unary_expression}|{add_expression}|{mult_expression}
+mult_expression             ({add_expression}|{unary_expression})([ ]*{mult_op}[ ]*({add_expression}|{unary_expression}))+
+add_expression              {unary_expression}([ ]*{add_op}[ ]*{unary_expression})+
 unary_expression            ({unary_op}[ ]*)?{num}
 
 comment                     {comment_begin}{comment_body}*{comment_end}
@@ -37,7 +39,10 @@ comment_end                 \*+\)
 {num}                       cout << YYText() << "-> num" << endl;
 
 {var}                       cout << YYText() << "-> var" << endl;
-{expression}                cout << YYText() << "-> expression" << endl;
+    /* {expression}                cout << YYText() << "-> expression" << endl; */
+{mult_expression}           cout << YYText() << "-> mult_expression" << endl;
+{add_expression}            cout << YYText() << "-> add_expression" << endl;
+{unary_expression}          cout << YYText() << "-> unary_expression" << endl;
 
 {comment}                   cout << YYText() << "-> coment" << endl;
 [ \t\n\r]                   /* skip whitespace */
