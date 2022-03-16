@@ -9,7 +9,7 @@
 %option noyywrap
 
 TYPE                        "int"|"float"
-ID                          [[:alpha:]_]|[[:alnum:]_]*
+ID                          [[:alpha:]_][[:alnum:]_]*
 NUM                         [[:digit:]]+(\.[[:digit:]]*)?
 
 %%

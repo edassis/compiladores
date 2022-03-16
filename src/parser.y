@@ -29,7 +29,8 @@ public:
 %locations
 
 %start input
-%token TYPE ID MULT DIV PLUS MINUS EQUAL END
+%token TYPE MULT DIV PLUS MINUS EQUAL END
+%token <cval> ID
 %token <dval> NUM
 %type <dval> exp
 %type <cval> input
@@ -42,12 +43,12 @@ input:	    { $$ = new Data(); }
 			| input line { $$ = $1; $1->data++; }
 			;
 
-line:		exp EQUAL END         { printf("\t%f\n", $1); }
-            | ID END              { printf("\t%f\n", $1); }
-            | TYPE END            { printf("\t%f\n", $1); }
+line:		exp END         { printf("\t%f\n", $1); }
+            | ID END          { printf("\t%f\n", $1); }
 			;
 
 exp:		NUM                   { $$ = $1; }
+            | MINUS NUM           { $$ = -$2; }
 			| exp PLUS exp        { $$ = $1 + $3; }
 			| exp MINUS exp       { $$ = $1 - $3; }
 			| exp MULT exp        { $$ = $1 * $3; }
