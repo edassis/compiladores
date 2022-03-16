@@ -19,11 +19,11 @@ NUM                         [[:digit:]]+(\.[[:digit:]]*)?
 "*"                         { return MULT; }
 "/"                         { return DIV; }
 "="                         { return EQUAL; }
-{TYPE}                      { return TYPE; }
-{ID}                        { return ID; }
-{NUM}                       { return NUM; }
+{TYPE}                      { yylval.dval = atof(yytext); return TYPE; }
+{ID}                        { yylval.string = yytext; return ID; }
+{NUM}                       { yylval.dval = atof(yytext); return NUM; }
 "\n"                        { return END; }
-[ \t\r]                   /* skip whitespace */
+[ \t\r]                     /* skip whitespace */
 .                           { printf("Error at line %d: unrecognized symbol \"%s\"\n", yylloc.first_line, yytext); exit(0); }
 
 %%
