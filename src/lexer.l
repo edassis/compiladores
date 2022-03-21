@@ -12,6 +12,11 @@ TYPE                        "int"|"float"
 ID                          [[:alpha:]_][[:alnum:]_]*
 NUM                         [[:digit:]]+(\.[[:digit:]]*)?
 
+COMMENT                     {COMMENT_BEG}{COMMENT_BODY}*{COMMENT_END}
+COMMENT_BEG                 \(\*
+COMMENT_BODY                [^\*]|\*+[^\*\)]
+COMMENT_END                 \*+\)
+
 %%
   /* Rules */
 "-"                         { return MINUS; }
@@ -19,10 +24,14 @@ NUM                         [[:digit:]]+(\.[[:digit:]]*)?
 "*"                         { return MULT; }
 "/"                         { return DIV; }
 "="                         { return EQUAL; }
-{TYPE}                      { yylval.dval = atof(yytext); return TYPE; }
-{ID}                        { yylval.string = yytext; return ID; }
+";"                         { return CMD_END; }
+ /* {COMMENT_BODY}              { yylval.text = yytext; return COMMENT_BODY; } */
+ /* {COMMENT_BEG}               { yylval.text = yytext; return COMMENT_BEG; } // Use value to facilitate concatenation */
+ /* {COMMENT_END}               { yylval.text = yytext; return COMMENT_END; } */
+{COMMENT}                   { yylval.text = yytext; return COMMENT; }
+{TYPE}                      { yylval.text = yytext; return TYPE; }
+{ID}                        { yylval.text = yytext; return ID; }
 {NUM}                       { yylval.dval = atof(yytext); return NUM; }
-"\n"                        { return END; }
 [ \t\r]                     /* skip whitespace */
 .                           { printf("Error at line %d: unrecognized symbol \"%s\"\n", yylloc.first_line, yytext); exit(0); }
 

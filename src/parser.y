@@ -7,6 +7,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include "lexer.hpp"
 void yyerror(const char *msg);
 
@@ -22,7 +23,7 @@ public:
 %union{
   double dval;
   int ival;
-  char* string;
+  char* text;
   Data* cval;
 }
 
@@ -30,31 +31,50 @@ public:
 %locations
 
 %start input
-%token TYPE MULT DIV PLUS MINUS EQUAL END
-%token <string> ID
+%token MULT DIV PLUS MINUS EQUAL CMD_END
+%token <text> ID TYPE COMMENT_BODY COMMENT_BEG COMMENT_END COMMENT
 %token <dval> NUM
-%type <dval> exp
 %type <cval> input
+%type <dval> exp
+%type <text> comment
 %left PLUS MINUS
 %left MULT DIV
 
 
 %% 
-input:	    { $$ = new Data(); }
-			| input line { $$ = $1; $1->data++; }
+input:	                                { $$ = new Data(); }
+			| input cmd                 { $$ = $1; $1->data++; }
 			;
 
-line:		exp END               { printf("\t%f\n", $1); }
-            | ID END              { printf("\t%s\n", $1); }
+cmd:		exp CMD_END                 { printf("\t%f\n", $1); }
+            | ID CMD_END                { printf("\t%s\n", $1); }
+            | comment                   { printf("\t%s\n", $1); }
 			;
 
-exp:		NUM                   { $$ = $1; }
-            | MINUS exp           { $$ = -$2; }
-			| exp PLUS exp        { $$ = $1 + $3; }
-			| exp MINUS exp       { $$ = $1 - $3; }
-			| exp MULT exp        { $$ = $1 * $3; }
-			| exp DIV exp         { if ($3==0) yyerror("divide by zero"); else $$ = $1 / $3; }
+exp:		NUM                         { $$ = $1; }
+            | MINUS exp                 { $$ = -$2; }
+			| exp PLUS exp              { $$ = $1 + $3; }
+			| exp MINUS exp             { $$ = $1 - $3; }
+			| exp MULT exp              { $$ = $1 * $3; }
+			| exp DIV exp               { if ($3==0) yyerror("divide by zero"); else $$ = $1 / $3; }
 			;
+
+comment:    COMMENT                     { $$ = $1; } 
+            | COMMENT_BEG COMMENT_END                         
+                { 
+                    char* dst = $1;
+                    dst = strcat(dst, $2);
+                    $$ = dst;
+                }
+            | COMMENT_BEG COMMENT_BODY COMMENT_END
+                { 
+                    char* dst = $1;
+                    dst = strcat(dst, $2);
+                    dst = strcat(dst, $3);
+                    $$ = dst;
+                }
+            ;
+
 %%
 
 int main(int argc, char **argv) {
