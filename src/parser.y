@@ -32,27 +32,30 @@ public:
 
 %start input
 %token MULT DIV PLUS MINUS EQUAL CMD_END
-%token <text> ID TYPE COMMENT_BODY COMMENT_BEG COMMENT_END COMMENT
+%token <text> ID TYPE COMMENT_BODY COMMENT_BEG COMMENT_END COMMENT PARENTHESIS_BEG PARENTHESIS_END FUNCTION_CALL
 %token <dval> NUM
 %type <cval> input
 %type <dval> exp
-%type <text> comment
+%type <text> comment compound_stmt 
 %left PLUS MINUS
 %left MULT DIV
 
 
 %% 
+CMD_OPT: | CMD_END;
+
 input:	                                { $$ = new Data(); }
 			| input cmd                 { $$ = $1; $1->data++; }
 			;
 
 cmd:		exp CMD_END                 { printf("\t%f\n", $1); }
-            | ID CMD_END                { printf("\t%s\n", $1); }
+            | ID EQUAL exp CMD_END      { printf("\t%s\n", $1); }
             | comment                   { printf("\t%s\n", $1); }
+            | compound_stmt            
 			;
 
 exp:		NUM                         { $$ = $1; }
-            | MINUS exp                 { $$ = -$2; }
+         | MINUS exp                 { $$ = -$2; }
 			| exp PLUS exp              { $$ = $1 + $3; }
 			| exp MINUS exp             { $$ = $1 - $3; }
 			| exp MULT exp              { $$ = $1 * $3; }
@@ -74,6 +77,12 @@ comment:    COMMENT                     { $$ = $1; }
                     $$ = dst;
                 }
             ;
+            
+compound_stmt:    PARENTHESIS_BEG compound_stmt PARENTHESIS_END      { printf("Parentese sem chamada funcao: \t%s\n", $1); }
+                  | FUNCTION_CALL CMD_END                           { printf("Chamada com args de funcao: \t%s\n", $1); }
+                  | PARENTHESIS_BEG PARENTHESIS_END CMD_END         { printf("Chamada normal de funcao: \t%s\n", $1); }
+                  | PARENTHESIS_BEG input PARENTHESIS_END CMD_OPT  { printf("Caso composto: \t%s\n", $1); }
+               ;
 
 %%
 
