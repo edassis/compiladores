@@ -17,14 +17,14 @@ COMMENT_BEG                 \(\*
 COMMENT_BODY                [^\*]|\*+[^\*\)]
 COMMENT_END                 \*+\)
 
-FUNCTION_CALL               [[:alpha:]_][[:alnum:]_]*{PARENTHESIS_BEG}[0-9]*{PARENTHESIS_END}
+FUNCTION_CALL               {ID}{PARENTHESIS_BEG}[0-9]*{PARENTHESIS_END}
 PARENTHESIS_BEG             \(
 PARENTHESIS_END             \)
 
 %%
   /* Rules */
-"("                         { return PARENTHESIS_BEG; }
-")"                         { return PARENTHESIS_END; }
+{PARENTHESIS_BEG}           { return PARENTHESIS_BEG; }
+{PARENTHESIS_END}           { return PARENTHESIS_END; }
 "-"                         { return MINUS; }
 "+"                         { return PLUS; }
 "*"                         { return MULT; }
