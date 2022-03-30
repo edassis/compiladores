@@ -17,8 +17,14 @@ COMMENT_BEG                 \(\*
 COMMENT_BODY                [^\*]|\*+[^\*\)]
 COMMENT_END                 \*+\)
 
+FUNCTION_CALL               [[:alpha:]_][[:alnum:]_]*{PARENTHESIS_BEG}[0-9]*{PARENTHESIS_END}
+PARENTHESIS_BEG             \(
+PARENTHESIS_END             \)
+
 %%
   /* Rules */
+"("                         { return PARENTHESIS_BEG; }
+")"                         { return PARENTHESIS_END; }
 "-"                         { return MINUS; }
 "+"                         { return PLUS; }
 "*"                         { return MULT; }
@@ -28,6 +34,7 @@ COMMENT_END                 \*+\)
  /* {COMMENT_BODY}              { yylval.text = yytext; return COMMENT_BODY; } */
  /* {COMMENT_BEG}               { yylval.text = yytext; return COMMENT_BEG; } // Use value to facilitate concatenation */
  /* {COMMENT_END}               { yylval.text = yytext; return COMMENT_END; } */
+{FUNCTION_CALL}             { yylval.text = yytext; return FUNCTION_CALL; }
 {COMMENT}                   { yylval.text = yytext; return COMMENT; }
 {TYPE}                      { yylval.text = yytext; return TYPE; }
 {ID}                        { yylval.text = yytext; return ID; }
