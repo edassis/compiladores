@@ -1,6 +1,7 @@
 %{
-#include <stdio.h>
+#include <string>
 #include "parser.hpp"
+#include "globals.h"
 #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
 %}
   /* Definition */
@@ -12,35 +13,41 @@ TYPE                        "int"|"float"
 ID                          [[:alpha:]_][[:alnum:]_]*
 NUM                         [[:digit:]]+(\.[[:digit:]]*)?
 
-COMMENT                     {COMMENT_BEG}{COMMENT_BODY}*{COMMENT_END}
-COMMENT_BEG                 \(\*
-COMMENT_BODY                [^\*]|\*+[^\*\)]
-COMMENT_END                 \*+\)
-
-FUNCTION_CALL               {ID}{PARENTHESIS_BEG}[0-9]*{PARENTHESIS_END}
-PARENTHESIS_BEG             \(
-PARENTHESIS_END             \)
+LPAREN                      \(
+RPAREN                      \)
+newline                     \n
+whitespace                  [ \t]
 
 %%
   /* Rules */
-{PARENTHESIS_BEG}           { return PARENTHESIS_BEG; }
-{PARENTHESIS_END}           { return PARENTHESIS_END; }
 "-"                         { return MINUS; }
 "+"                         { return PLUS; }
 "*"                         { return MULT; }
 "/"                         { return DIV; }
 "="                         { return EQUAL; }
-";"                         { return CMD_END; }
- /* {COMMENT_BODY}              { yylval.text = yytext; return COMMENT_BODY; } */
- /* {COMMENT_BEG}               { yylval.text = yytext; return COMMENT_BEG; } // Use value to facilitate concatenation */
- /* {COMMENT_END}               { yylval.text = yytext; return COMMENT_END; } */
-{FUNCTION_CALL}             { yylval.text = yytext; return FUNCTION_CALL; }
-{COMMENT}                   { yylval.text = yytext; return COMMENT; }
+";"                         { return SEMI; }
+"escreva"                   { return ESCREVA; }
 {TYPE}                      { yylval.text = yytext; return TYPE; }
 {ID}                        { yylval.text = yytext; return ID; }
 {NUM}                       { yylval.dval = atof(yytext); return NUM; }
-[ \t\r]                     /* skip whitespace */
-.                           { printf("Error at line %d: unrecognized symbol \"%s\"\n", yylloc.first_line, yytext); exit(0); }
+{LPAREN}                    { return LPAREN; }
+{RPAREN}                    { return RPAREN; }
+{newline}                   { lineno++; }
+{whitespace}                /* skip whitespace */
+"(*"                        {
+                              int c1 = 0, c2 = 0;
+                              while(true) { 
+                                c2 = c1;
+                                c1 = yyinput();
+                                if(c1 == 0 || (c2 == '*' && c1 == ')')) break;
+                                if(c1 == '\n') lineno++;
+                              }
+                            }
+.                           {
+                              std::string s = "unrecognized symbol " + std::string(yytext); 
+                              yyerror(s.data());
+                              exit(0);
+                            }
 
 %%
   /* User code */

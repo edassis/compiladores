@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string>
 #include "lexer.hpp"
+#include "globals.h"
 void yyerror(const char *msg);
 
 class Data {
@@ -21,82 +22,79 @@ public:
 %}
 
 %union{
-  double dval;
-  int ival;
-  char* text;
-  Data* cval;
+   double dval;
+   int ival;
+   char* text;
+   Data* cval;
 }
 
 %define parse.error verbose
 %locations
 
-%start input
-%token MULT DIV PLUS MINUS EQUAL CMD_END
-%token <text> ID TYPE COMMENT_BODY COMMENT_BEG COMMENT_END COMMENT PARENTHESIS_BEG PARENTHESIS_END FUNCTION_CALL
+%start program
+%token MULT DIV PLUS MINUS EQUAL SEMI LPAREN RPAREN ESCREVA
+%token <text> ID TYPE
 %token <dval> NUM
-%type <cval> input
-%type <dval> exp
-%type <text> comment compound_stmt 
+%type <cval> program
+%type ival exp
+%type <dval> simple_exp term
 %left PLUS MINUS
 %left MULT DIV
 
-
 %% 
-CMD_OPT: | CMD_END;
+program: stmt_seq                    { $$ = new Data(); }
+         ;
 
-input:	                                { $$ = new Data(); }
-			| input cmd                 { $$ = $1; $1->data++; }
-			;
+stmt_seq: stmt                       {} 
+          | stmt_seq SEMI stmt       {}
+			 ;
 
-cmd:		exp CMD_END                 { printf("\t%f\n", $1); }
-            | ID EQUAL exp CMD_END      { printf("\t%s\n", $1); }
-            | comment                   { printf("\t%s\n", $1); }
-            | compound_stmt            
-			;
+stmt: decl_stmt                      {} 
+      | assign_stmt                  {}
+      | func_stmt                    {}
+      ;
 
-exp:		NUM                         { $$ = $1; }
-         | MINUS exp                 { $$ = -$2; }
-			| exp PLUS exp              { $$ = $1 + $3; }
-			| exp MINUS exp             { $$ = $1 - $3; }
-			| exp MULT exp              { $$ = $1 * $3; }
-			| exp DIV exp               { if ($3==0) yyerror("divide by zero"); else $$ = $1 / $3; }
-			;
+assign_stmt: ID EQUAL simple_exp            { printf("\t%s = %f\n", $1, $3); }
+             | decl_stmt EQUAL simple_exp   { printf("\t%f\n", $3); }
+             ;
 
-comment:    COMMENT                     { $$ = $1; } 
-            | COMMENT_BEG COMMENT_END                         
-                { 
-                    char* dst = $1;
-                    dst = strcat(dst, $2);
-                    $$ = dst;
-                }
-            | COMMENT_BEG COMMENT_BODY COMMENT_END
-                { 
-                    char* dst = $1;
-                    dst = strcat(dst, $2);
-                    dst = strcat(dst, $3);
-                    $$ = dst;
-                }
+decl_stmt: TYPE ID                   { printf("\t%s\n", $2); }
+           ;
+
+func_stmt: write_func               {}
+           ;
+
+write_func: ESCREVA LPAREN simple_exp RPAREN    { printf("\t%f\n", $3); }
             ;
-            
-compound_stmt:    PARENTHESIS_BEG compound_stmt PARENTHESIS_END      { printf("Parentese sem chamada funcao: \t%s\n", $1); }
-                  | FUNCTION_CALL CMD_END                           { printf("Chamada com args de funcao: \t%s\n", $1); }
-                  | PARENTHESIS_BEG PARENTHESIS_END CMD_END         { printf("Chamada normal de funcao: \t%s\n", $1); }
-                  | PARENTHESIS_BEG input PARENTHESIS_END CMD_OPT  { printf("Caso composto: \t%s\n", $1); }
-               ;
 
+simple_exp: term                                { $$ = $1; }
+            | simple_exp PLUS simple_exp        { $$ = $1 + $3; }
+            | simple_exp MINUS simple_exp       { $$ = $1 - $3; }
+            ;
+
+term: NUM
+      | MINUS term                  { $$ = -$2; }
+      | term MULT term              { $$ = $1 * $3; }
+      | term DIV term               { if ($3==0) yyerror("divide by zero"); else $$ = $1 / $3; }
+      ;
+            
 %%
+
+int lineno = 0;
 
 int main(int argc, char **argv) {
    if (argc > 1) {
       yyin = fopen(argv[1], "r");
       if (yyin == NULL){
          printf("syntax: %s filename\n", argv[0]);
-      }//end if
-   }//end if
+      }
+   }
+
    yyparse(); // Calls yylex() for tokens.
+   
    return 0;
 }
 
 void yyerror(const char *msg) {
-   printf("** Line %d: %s\n", yylloc.first_line, msg);
+   printf("** Line %d: %s\n", lineno, msg);
 }
