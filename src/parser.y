@@ -10,7 +10,6 @@
 #include <string>
 #include "lexer.hpp"
 #include "globals.h"
-void yyerror(const char *msg);
 
 class Data {
 public:
@@ -32,14 +31,23 @@ public:
 %locations
 
 %start program
-%token MULT DIV PLUS MINUS EQUAL SEMI LPAREN RPAREN ESCREVA
-%token <text> ID TYPE
+
+%token MUL DIV PLUS MINUS 
+%token ASSIGN
+%token EQ NEQ LT LTE GT GTE
+%token AND OR NOT
+%token LER ESCREVER
+%token IF ELSE RET FOR WHILE
+%token INT FLOAT VOID
+%token LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE SEMI COMMA
+%token <text> ID
 %token <dval> NUM
+
 %type <cval> program
-%type ival exp
+/* %type <ival> exp */
 %type <dval> simple_exp term
-%left PLUS MINUS
-%left MULT DIV
+
+%left PLUS MINUS MUL DIV
 
 %% 
 program: stmt_seq                    { $$ = new Data(); }
@@ -54,17 +62,23 @@ stmt: decl_stmt                      {}
       | func_stmt                    {}
       ;
 
-assign_stmt: ID EQUAL simple_exp            { printf("\t%s = %f\n", $1, $3); }
-             | decl_stmt EQUAL simple_exp   { printf("\t%f\n", $3); }
+assign_stmt: ID ASSIGN simple_exp            { printf("\t%s = %f\n", $1, $3); }
+             | decl_stmt ASSIGN simple_exp   { printf("\t%f\n", $3); }
              ;
 
-decl_stmt: TYPE ID                   { printf("\t%s\n", $2); }
+decl_stmt: INT ID                   { printf("\t%s\n", $2); }
+           | FLOAT ID               { printf("\t%s\n", $2); }
            ;
 
 func_stmt: write_func               {}
+           | read_func              {}
            ;
 
-write_func: ESCREVA LPAREN simple_exp RPAREN    { printf("\t%f\n", $3); }
+write_func: ESCREVER LPAREN simple_exp RPAREN    { printf("\t%f\n", $3); }
+            ;
+
+read_func:  LER LPAREN RPAREN                   {}
+            | LER LPAREN VOID RPAREN            {}
             ;
 
 simple_exp: term                                { $$ = $1; }
@@ -74,7 +88,7 @@ simple_exp: term                                { $$ = $1; }
 
 term: NUM
       | MINUS term                  { $$ = -$2; }
-      | term MULT term              { $$ = $1 * $3; }
+      | term MUL term               { $$ = $1 * $3; }
       | term DIV term               { if ($3==0) yyerror("divide by zero"); else $$ = $1 / $3; }
       ;
             

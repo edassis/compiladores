@@ -9,31 +9,15 @@
 /* Read only one file as input */
 %option noyywrap
 
-TYPE                        "int"|"float"
+/* TYPE                        "int"|"float"|"void" */
 ID                          [[:alpha:]_][[:alnum:]_]*
 NUM                         [[:digit:]]+(\.[[:digit:]]*)?
 
-LPAREN                      \(
-RPAREN                      \)
 newline                     \n
 whitespace                  [ \t]
 
 %%
   /* Rules */
-"-"                         { return MINUS; }
-"+"                         { return PLUS; }
-"*"                         { return MULT; }
-"/"                         { return DIV; }
-"="                         { return EQUAL; }
-";"                         { return SEMI; }
-"escreva"                   { return ESCREVA; }
-{TYPE}                      { yylval.text = yytext; return TYPE; }
-{ID}                        { yylval.text = yytext; return ID; }
-{NUM}                       { yylval.dval = atof(yytext); return NUM; }
-{LPAREN}                    { return LPAREN; }
-{RPAREN}                    { return RPAREN; }
-{newline}                   { lineno++; }
-{whitespace}                /* skip whitespace */
 "(*"                        {
                               int c1 = 0, c2 = 0;
                               while(true) { 
@@ -43,6 +27,51 @@ whitespace                  [ \t]
                                 if(c1 == '\n') lineno++;
                               }
                             }
+"-"                         { return MINUS; }
+"+"                         { return PLUS; }
+"*"                         { return MUL; }
+"/"                         { return DIV; }
+
+"="                         { return ASSIGN; }
+
+"=="                        { return EQ; }
+"!="                        { return NEQ; }
+"<"                         { return LT; }
+"<="                        { return LTE; }
+">"                         { return GT; }
+">="                        { return GTE; }
+
+"&&"                        { return AND; }
+"||"                        { return OR; }
+"!"                         { return OR; }
+
+"ler"                       { return LER; }
+"escrever"                  { return ESCREVER; }
+
+"if"                        { return IF; }
+"else"                      { return ELSE; }
+"return"                    { return RET; }
+"for"                       { return FOR; }
+"while"                     { return WHILE; }
+
+"int"                       { return INT; }
+"float"                     { return FLOAT; }
+"void"                      { return VOID; }
+
+"("                         { return LPAREN; }
+")"                         { return RPAREN; }
+"["                         { return LBRACK; }
+"]"                         { return RBRACK; }
+"{"                         { return LBRACE; }
+"}"                         { return RBRACE; }
+";"                         { return SEMI; }
+","                         { return COMMA; }
+
+ /* {TYPE}                      { yylval.text = yytext; return TYPE; } */
+{ID}                        { yylval.text = yytext; return ID; }
+{NUM}                       { yylval.dval = atof(yytext); return NUM; }
+{newline}                   { lineno++; }
+{whitespace}                /* skip whitespace */
 .                           {
                               std::string s = "unrecognized symbol " + std::string(yytext); 
                               yyerror(s.data());
