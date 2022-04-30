@@ -44,7 +44,7 @@ public:
 %token <dval> NUM
 
 %type <cval> program
-/* %type <ival> exp */
+ /* %type <ival> exp */
 %type <dval> simple_exp term
 
 %left PLUS MINUS MUL DIV
@@ -53,26 +53,37 @@ public:
 program: stmt_seq                    { $$ = new Data(); }
          ;
 
-stmt_seq: stmt                       {} 
-          | stmt_seq SEMI stmt       {}
-			 ;
+stmt_seq: stmt                                          {} 
+          | stmt_seq SEMI stmt                          {}
+          | stmt_seq LBRACE stmt_seq RBRACE stmt        {}
+		  ;
 
-stmt: decl_stmt                      {} 
-      | assign_stmt                  {}
-      | func_stmt                    {}
+stmt: decl_stmt                             {} 
+      | assign_stmt                         {}
+      | func_stmt                           {}
+      | if_stmt                             {}
+      | else_stmt                           {}
+      | for_stmt                            {}
+      | while_stmt                          {}
       ;
 
-assign_stmt: ID ASSIGN simple_exp            { printf("\t%s = %f\n", $1, $3); }
-             | decl_stmt ASSIGN simple_exp   { printf("\t%f\n", $3); }
+assign_stmt: ID ASSIGN simple_exp               { printf("\t%s = %f\n", $1, $3); }
+             | decl_stmt ASSIGN simple_exp      { printf("\t%f\n", $3); }
              ;
 
-decl_stmt: INT ID                   { printf("\t%s\n", $2); }
-           | FLOAT ID               { printf("\t%s\n", $2); }
+decl_stmt: INT ID                           { printf("\t%s\n", $2); }
+           | FLOAT ID                       { printf("\t%s\n", $2); }
            ;
 
-func_stmt: write_func               {}
-           | read_func              {}
+func_stmt: write_func                       {}
+           | read_func                      {}
+           | ID LPAREN param_args RPAREN {}
            ;
+
+param_args: /* void */                      {}
+            | decl_stmt                     {}
+            | param_args COMMA decl_stmt    {} 
+            ;
 
 write_func: ESCREVER LPAREN simple_exp RPAREN    { printf("\t%f\n", $3); }
             ;
@@ -80,6 +91,20 @@ write_func: ESCREVER LPAREN simple_exp RPAREN    { printf("\t%f\n", $3); }
 read_func:  LER LPAREN RPAREN                   {}
             | LER LPAREN VOID RPAREN            {}
             ;
+
+
+if_stmt:    IF LPAREN logical_comp RPAREN       {}
+            ;
+
+else_stmt:  ELSE                                {}
+            ;
+
+while_stmt: WHILE LPAREN logical_comp RPAREN    {}
+            ;
+
+for_stmt:   FOR LPAREN decl_stmt SEMI logical_comp SEMI assign_stmt RPAREN {}
+            ;
+
 
 simple_exp: term                                { $$ = $1; }
             | simple_exp PLUS simple_exp        { $$ = $1 + $3; }
@@ -92,6 +117,14 @@ term: NUM
       | term DIV term               { if ($3==0) yyerror("divide by zero"); else $$ = $1 / $3; }
       ;
             
+logical_comp: values_comp
+
+
+values_comp:    ID                  {}
+                | NUM               {}
+                ;
+
+relop: 
 %%
 
 int lineno = 0;
