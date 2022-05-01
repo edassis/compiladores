@@ -12,6 +12,7 @@
 /* TYPE                        "int"|"float"|"void" */
 ID                          [[:alpha:]_][[:alnum:]_]*
 NUM                         [[:digit:]]+(\.[[:digit:]]*)?
+STRCON                      \"[[:alnum:]]*\"
 
 newline                     \n
 whitespace                  [ \t]
@@ -43,7 +44,8 @@ whitespace                  [ \t]
 
 "&&"                        { return AND; }
 "||"                        { return OR; }
-"!"                         { return OR; }
+
+"!"                         { return NOT; }
 
 "ler"                       { return LER; }
 "escrever"                  { return ESCREVER; }
@@ -70,6 +72,7 @@ whitespace                  [ \t]
  /* {TYPE}                      { yylval.text = yytext; return TYPE; } */
 {ID}                        { yylval.text = yytext; return ID; }
 {NUM}                       { yylval.dval = atof(yytext); return NUM; }
+{STRCON}                    { yylval.text = yytext; return STRCON; }
 {newline}                   { lineno++; }
 {whitespace}                /* skip whitespace */
 .                           {
