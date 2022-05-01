@@ -43,9 +43,9 @@ stmt_list:  %empty
             | stmt_list stmt
             ;
 
-/* decl_list:  %empty */
-/*             | decl_list decl */
-/*             ; */
+    /* decl_list:  %empty */
+    /*             | decl_list decl */
+    /*             ; */
 
 decl_stmt:  decl SEMI
             ;
@@ -70,8 +70,8 @@ stmt:   decl_stmt                               {}
         ;
 
      /* Permitir escopo */ 
-compound_stmt:  LBRACE local_decl stmt_list RBRACE
-                ;
+    /* compound_stmt:  LBRACE local_decl stmt_list RBRACE */
+    /*                 ; */
 
 
 func_stmt:   write_func SEMI
@@ -104,13 +104,13 @@ assign: ID ASSIGN expr              {printf("atribuicao 1\n");}
     /*             ; */
 
 
-selection_stmt: IF LPAREN expr RPAREN stmt_list                         {printf("if\n");}
-                | IF LPAREN expr RPAREN stmt_list ELSE stmt_list        {printf("recursao if/else\n");}  /* Sequencia de if/else if */
+selection_stmt: IF LPAREN expr RPAREN LBRACE stmt_list RBRACE                                       {printf("if\n");}
+                | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE        {printf("if/else\n");}  /* Sequencia de if/else if */
                 ;
 
 
-iteration_stmt: WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE                        {printf("while\n");}
-                | FOR LPAREN assign SEMI expr SEMI assign RPAREN compound_stmt          {printf("for\n");}
+iteration_stmt: WHILE LPAREN expr RPAREN LBRACE stmt_list RBRACE                                    {printf("while\n");}
+                | FOR LPAREN assign SEMI expr SEMI assign RPAREN LBRACE stmt_list RBRACE            {printf("for\n");}
                 ;
 
 
@@ -119,35 +119,35 @@ return_stmt:    RET SEMI                    {printf("return\n");}
                 ;
 
 
-expr:   logical_expr relop logical_expr       {printf("MINUS expr");}
+expr:   logical_expr relop logical_expr       {printf("logical_expr RELOP logical_expr\n");}
         /* | expr binop expr           {printf("expr binop exprn\n");} */
         /* | expr logical_op expr      {printf("expr logical_op expr\n");} */
         /* | expr relop expr           {printf("expr relop expr\n");} */
-        | logical_expr
+        | logical_expr                        {printf("logical_expr\n");}
         ;
 
-logical_expr:   logical_expr AND unary_expr
-                | logical_expr OR unary_expr
-                | unary_expr
+logical_expr:   logical_expr AND unary_expr     {printf("logical_exp AND unary_expr\n");}
+                | logical_expr OR unary_expr    {printf("logical_exp OR unary_expr\n");}
+                | unary_expr                    {printf("unary_expr\n");}
                 ;
 
-unary_expr: NOT simple_expr
-            | simple_expr
+unary_expr: NOT simple_expr                     {printf("NOT simple_expr\n");}
+            | simple_expr                       {printf("simple_expr\n");}
             ;
 
-simple_expr: simple_expr PLUS term
-            | simple_expr MINUS term
-            | term
-            ;
+simple_expr:    simple_expr PLUS term           {printf("simple_expr PLUS term\n");}
+                | simple_expr MINUS term        {printf("simple_expr MINUS term\n");}
+                | term                          {printf("term\n");}
+                ;
 
-term:   term MUL factor
-        | term DIV factor
-        | factor
+term:   term MUL factor                         {printf("term MUL factor\n");}
+        | term DIV factor                       {printf("term DIV factor\n");}
+        | factor                                {printf("factor\n");}
         ;
 
-factor: LPAREN expr RPAREN
-        | NUM
-        | ID
+factor: LPAREN expr RPAREN                      {printf("(expr)\n");}
+        | NUM                                   {printf("num\n");}
+        | ID                                    {printf("id\n");}
         ;
 
 relop:  EQ                          
