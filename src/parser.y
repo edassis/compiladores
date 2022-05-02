@@ -135,15 +135,18 @@ int getRegNumfromRegOrTmp(RegOrTmp* val){
       
       append_new(strdup(registers_used.front()->tmp_var_name.c_str()), localVarBytes, 1, head); 
 
-      write_code_2("ST", reg_dest, localVarBytes, zr_reg);
+      write_code_2("LDC", 0, 1, zr_reg);
+      write_code_1("ADD", sp_reg, sp_reg, zr_reg);
+      write_code_2("LDC", 0, 0, zr_reg);
       localVarBytes += 1;
       last_tmp_var++;
+      write_code_2("ST", reg_dest, -1, sp_reg);
       
       registers_used.pop_front();
 
       reg_orig = val->num = reg_dest;
 
-      write_code_2("LD", reg_orig, find(strdup(val->tmp_var_name.c_str()), head)->loc, zr_reg);
+      write_code_2("LD", reg_orig, find(strdup(val->tmp_var_name.c_str()), head)->loc - localVarBytes, sp_reg);
       registers_used.push_back(val);
    } else{
       reg_orig = val->num;
@@ -170,8 +173,11 @@ RegOrTmp* getRegOrTmp(){
       
       append_new(strdup(registers_used.front()->tmp_var_name.c_str()), localVarBytes, 1, head); 
 
-      write_code_2("ST", reg_dest, localVarBytes, zr_reg);
+      write_code_2("LDC", 0, 1, zr_reg);
+      write_code_1("ADD", sp_reg, sp_reg, zr_reg);
+      write_code_2("LDC", 0, 0, zr_reg);
       localVarBytes += 1;
+      write_code_2("ST", reg_dest, -1, sp_reg);
       // simbleTableSize++;
       last_tmp_var++;
       
@@ -213,7 +219,7 @@ RegOrTmp* getRegOrTmp(){
 %token <text> STRCON
 
 %type <ival> type_spec var_decl relop
-%type <reg_tmp> expr logical_expr unary_expr simple_expr term factor 
+%type <reg_tmp> expr logical_expr unary_expr simple_expr term factor read_func
 
 %% 
 program: stmt_list                            {}
@@ -264,7 +270,7 @@ stmt:   decl_stmt                               {}
     /*                 ; */
 
 
-func_stmt:   write_func SEMI
+func_stmt:   write_func SEMI {}
             | read_func SEMI
             /* Funções reais desativadas */
             /* | type_spec ID LPAREN parm_list RPAREN compound_stmt */
@@ -315,9 +321,16 @@ assign: ID ASSIGN expr              {
     /*             | parm_list COMMA var_decl       {}  */
     /*             ; */
 
+selection_stmt: IF {
 
-selection_stmt: IF LPAREN expr RPAREN LBRACE stmt_list RBRACE                                       {printf("if\n");}
-                | IF LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE        {printf("if/else\n");}  /* Sequencia de if/else if */
+} LPAREN expr RPAREN LBRACE stmt_list RBRACE                                       {
+   printf("if\n");
+}
+                | IF {
+   
+} LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE        {
+   printf("if/else\n");
+}  
                 ;
 
 
@@ -330,7 +343,7 @@ iteration_stmt: WHILE {
    write_code_2("JEQ", num_reg_1, 0, pc_reg);
    removeRegOrTmp($4);
 } LBRACE stmt_list RBRACE                                    {
-   printf("while\n");
+   // printf("while\n");
 
    removeLevel(level);
    level--; 
@@ -339,7 +352,6 @@ iteration_stmt: WHILE {
    conditionArg.pop();
    write_code_2("JEQ", zr_reg, codeSizeStack.top() - code.size() - 1, pc_reg);
    codeSizeStack.pop();
-   printf("while\n");
 }
                 | FOR LPAREN assign SEMI expr SEMI assign RPAREN LBRACE stmt_list RBRACE            {
    printf("for\n");
@@ -363,9 +375,17 @@ expr:   logical_expr relop logical_expr       {
    write_code_1("SUB", num_reg_1, num_reg_1, num_reg_2);
    write_code_2("LDC", zr_reg, 1, 0);
    if($2 == 0){
-      write_code_2("JEQ", zr_reg, 1, pc_reg);
+      write_code_2("JEQ", num_reg_1, 1, pc_reg);
    } else if($2 == 1){
       write_code_2("JNE", num_reg_1, 1, pc_reg);
+   } else if($2 == 2){
+      write_code_2("JLT", num_reg_1, 1, pc_reg);
+   } else if($2 == 3){
+      write_code_2("JLE", num_reg_1, 1, pc_reg);
+   } else if($2 == 4){
+      write_code_2("JGT", num_reg_1, 1, pc_reg);
+   } else if($2 == 5){
+      write_code_2("JGE", num_reg_1, 1, pc_reg);
    }
    write_code_2("LDC", zr_reg, 0, 0);
    write_code_2("LDA", num_reg_1, 0, zr_reg);

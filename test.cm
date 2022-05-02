@@ -5,3 +5,18 @@ while(n != 0){
     n = n - 1;
 }
 escrever(fat);
+escrever(0 < 1); (*true*)
+escrever(1 < 1); (*false*)
+escrever(0 <= 1); (*true*)
+escrever(1 <= 1); (*true*)
+escrever(2 <= 1); (*false*)
+escrever(1 > 0); (*true*)
+escrever(1 > 1); (*false*)
+escrever(1 >= 0); (*true*)
+escrever(1 >= 1); (*true*)
+escrever(1 >= 2); (*false*)
+escrever(1 != 2); (*true*)
+escrever(1 != 1); (*false*)
+escrever(1 == 1); (*true*)
+escrever(1 == 2); (*false*)
+escrever(-5);
