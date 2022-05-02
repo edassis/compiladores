@@ -4,7 +4,7 @@
 #include "globals.h"
 #define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
 %}
-  /* Definition */
+/* Definition */
 
 /* Read only one file as input */
 %option noyywrap
@@ -70,9 +70,9 @@ whitespace                  [ \t]
 ","                         { return COMMA; }
 
  /* {TYPE}                      { yylval.text = yytext; return TYPE; } */
-{ID}                        { yylval.text = yytext; return ID; }
+{ID}                        { yylval.text = strdup(yytext); return ID; }
 {NUM}                       { yylval.dval = atof(yytext); return NUM; }
-{STRCON}                    { yylval.text = yytext; return STRCON; }
+{STRCON}                    { yylval.text = strdup(yytext); return STRCON; }
 {newline}                   { lineno++; }
 {whitespace}                /* skip whitespace */
 .                           {

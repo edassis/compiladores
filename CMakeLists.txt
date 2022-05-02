@@ -21,7 +21,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)
 flex_target(LEXER ${CMAKE_CURRENT_SOURCE_DIR}/src/lexer.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/lexer.hpp COMPILE_FLAGS "")
-bison_target(PARSER ${CMAKE_CURRENT_SOURCE_DIR}/src/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp COMPILE_FLAGS "-d -v -Wcounterexamples")
+bison_target(PARSER ${CMAKE_CURRENT_SOURCE_DIR}/src/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp COMPILE_FLAGS "-d -v")
 # FLEX_TARGET(MyScanner ${CMAKE_CURRENT_SOURCE_DIR}/src/lexico.l)
 add_flex_bison_dependency(LEXER PARSER)
 
