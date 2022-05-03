@@ -1,11 +1,21 @@
-if(1){
-    if(2){
-        if(3){
 
+escrever(0);
+int n = ler();
+if(n){
+    escrever(1);
+    n = ler();
+    if(n){
+        escrever(2);
+        n = ler();
+        if(n){
+            escrever(3);
         } else{
-
+            escrever(4);
         }
+        escrever(5);
     }
+    escrever(6);
 } else{
-
+    escrever(7);
 }
+escrever(8);
