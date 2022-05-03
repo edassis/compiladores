@@ -265,7 +265,7 @@ RegOrTmp* getRegOrTmp(){
 %token MUL DIV PLUS MINUS 
 %token ASSIGN
 %token EQ NEQ LT LTE GT GTE
-%token AND OR NOT
+%token NOT
 %token LER ESCREVER
 %token IF ELSE RET FOR WHILE
 %token INT FLOAT VOID
@@ -519,7 +519,7 @@ return_stmt:    RET SEMI                    {
                 ;
 
 
-expr:   logical_expr relop logical_expr       {
+expr:   unary_expr relop unary_expr       {
    // printf("logical_expr RELOP logical_expr\n");
    int num_reg_1 = getRegNumfromRegOrTmp($1);
    int num_reg_2 = getRegNumfromRegOrTmp($3);
@@ -547,23 +547,11 @@ expr:   logical_expr relop logical_expr       {
         /* | expr binop expr           {printf("expr binop exprn\n");} */
         /* | expr logical_op expr      {printf("expr logical_op expr\n");} */
         /* | expr relop expr           {printf("expr relop expr\n");} */
-        | logical_expr                        {
+        | unary_expr                        {
    // printf("logical_expr\n");
    $$ = $1;
 }
         ;
-
-logical_expr:   logical_expr AND unary_expr     {
-   // printf("logical_exp AND unary_expr\n");
-}
-                | logical_expr OR unary_expr    {
-   // printf("logical_exp OR unary_expr\n");
-}
-                | unary_expr                    {
-   // printf("unary_expr\n");
-   $$ = $1;
-}
-                ;
 
 unary_expr: NOT simple_expr                     {
    // printf("NOT simple_expr\n");
@@ -685,6 +673,8 @@ type_spec:  INT {
 
 int lineno = 0;
 
+void writeAsm();
+
 int main(int argc, char **argv) {
    if (argc > 1) {
       yyin = fopen(argv[1], "r");
@@ -693,27 +683,9 @@ int main(int argc, char **argv) {
       }
    }
 
-   code.push_back(AsmLine{0, "LDA" , 2, 1, 0, 7});
-   code.push_back(AsmLine{1, "LDC" , 2, 0, 8, 0});
-   code.push_back(AsmLine{2, "ADD" , 1, 1, 1, 0});
-   code.push_back(AsmLine{3, "LDC" , 2, 0, 0, 0});
-   code.push_back(AsmLine{4, "ST"  , 2, 1, 0, 6});
-   code.push_back(AsmLine{5, "LDC" , 2, 0, 1, 0});
-   code.push_back(AsmLine{6, "ADD" , 1, 6, 6, 0});
-   code.push_back(AsmLine{7, "LDC" , 2, 0, 0, 0});
-   code.push_back(AsmLine{8, "JEQ" , 2, 0, 1, 7});
-   code.push_back(AsmLine{9, "HALT", 1, 0, 0, 0});
    yyparse(); // Calls yylex() for tokens.
-   
-   std::string res;
-   for(auto v : code){
-      if(v.type == 1){
-         res += std::to_string(v.line) + ": " + v.opCode + " " + std::to_string(v.arg1) + ", " + std::to_string(v.arg2) + ", " + std::to_string(v.arg3) + "\n";
-      } else{
-         res += std::to_string(v.line) + ": " + v.opCode + " " + std::to_string(v.arg1) + ", " + std::to_string(v.arg2) + "(" + std::to_string(v.arg3) + ")\n";
-      }
-   }
-   printf("%s\n", res.c_str());
+
+   writeAsm(); 
 
    return 0;
 }
@@ -837,4 +809,19 @@ Symb** cria_lista(){
   if(li == nullptr) return 0;
   *li = nullptr;
   return li;
+}
+
+
+void writeAsm() {
+   code.push_back(AsmLine{9, "HALT", 1, 0, 0, 0});   
+   
+   std::string res;
+   for(auto v : code){
+      if(v.type == 1){
+         res += std::to_string(v.line) + ": " + v.opCode + " " + std::to_string(v.arg1) + ", " + std::to_string(v.arg2) + ", " + std::to_string(v.arg3) + "\n";
+      } else{
+         res += std::to_string(v.line) + ": " + v.opCode + " " + std::to_string(v.arg1) + ", " + std::to_string(v.arg2) + "(" + std::to_string(v.arg3) + ")\n";
+      }
+   }
+   printf("%s\n", res.c_str());
 }

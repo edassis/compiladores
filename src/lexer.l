@@ -9,7 +9,6 @@
 /* Read only one file as input */
 %option noyywrap
 
-/* TYPE                        "int"|"float"|"void" */
 ID                          [[:alpha:]_][[:alnum:]_]*
 NUM                         [[:digit:]]+(\.[[:digit:]]*)?
 STRCON                      \"[[:alnum:]]*\"
@@ -42,9 +41,6 @@ whitespace                  [ \t]
 ">"                         { return GT; }
 ">="                        { return GTE; }
 
-"&&"                        { return AND; }
-"||"                        { return OR; }
-
 "!"                         { return NOT; }
 
 "ler"                       { return LER; }
@@ -69,7 +65,6 @@ whitespace                  [ \t]
 ";"                         { return SEMI; }
 ","                         { return COMMA; }
 
- /* {TYPE}                      { yylval.text = yytext; return TYPE; } */
 {ID}                        { yylval.text = strdup(yytext); return ID; }
 {NUM}                       { yylval.dval = atof(yytext); return NUM; }
 {STRCON}                    { yylval.text = strdup(yytext); return STRCON; }
