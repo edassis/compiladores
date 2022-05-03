@@ -284,11 +284,13 @@ stmt:   decl_stmt                               {}
     /* compound_stmt:  LBRACE local_decl stmt_list RBRACE */
     /*                 ; */
 
+func: write_func
+      | read_func
+      /* Funções reais desativadas */
+      /* | type_spec ID LPAREN parm_list RPAREN compound_stmt */
+      ;
 
-func_stmt:   write_func SEMI {}
-            | read_func SEMI
-            /* Funções reais desativadas */
-            /* | type_spec ID LPAREN parm_list RPAREN compound_stmt */
+func_stmt:  func SEMI
             ; 
 
 write_func: ESCREVER LPAREN expr RPAREN     { 
@@ -324,7 +326,9 @@ assign: ID ASSIGN expr              {
    
    removeRegOrTmp($3);
 
-}
+}       
+        | ID ASSIGN func            {printf("atribuicao funcao 1\n");}
+        | var_decl ASSIGN func      {printf("atribuicao funcao 2\n");}
         ;
 
 
@@ -336,16 +340,19 @@ assign: ID ASSIGN expr              {
     /*             | parm_list COMMA var_decl       {}  */
     /*             ; */
 
-selection_stmt: IF {
+if_init:    IF {
+   printf("if_init\n");
+} LPAREN expr RPAREN LBRACE stmt_list RBRACE
+            ;
 
-} LPAREN expr RPAREN LBRACE stmt_list RBRACE                                       {
+selection_stmt: if_init                                       {
    printf("if\n");
 }
-                | IF {
-   
-} LPAREN expr RPAREN LBRACE stmt_list RBRACE ELSE LBRACE stmt_list RBRACE        {
+                | if_init ELSE {
+   printf("if/else1\n");
+} LBRACE stmt_list RBRACE        {
    printf("if/else\n");
-}  
+}  /* Sequencia de if/else if */
                 ;
 
 
