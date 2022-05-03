@@ -18,9 +18,10 @@ struct Symb{
     int32_t usado;
     int type;
     struct Symb *next;
+    int32_t nivel;
 };
 
-void append_new(char* name, int location, int type, Symb** head);
+void append_new(char* name, int location, int type, int nivel, Symb** head);
 Symb* find(char* name, Symb** head);
 void used(char* name, Symb** head);
 void printTS(Symb** head);

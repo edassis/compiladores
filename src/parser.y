@@ -86,35 +86,49 @@ void write_code_2(std::string name, int r, int d, int s){
 
 
 void removeLevel(int num){
-   // while(!simbleTable2.empty() && simbleTable2.back()->level == num){
-   //    if(isInFunction()){
-   //       localVarBytes -= simbleTable2.back()->size;
-   //    } else{
-   //       globalVarBytes -= simbleTable2.back()->size;
-   //    }
-   //    simbleTable1.erase(simbleTable2.back()->name);
-   //    simbleTable2.pop_back();
-   //    write_code_2("LDC", zr_reg, 1, zr_reg);
-   //    write_code_1("SUB", 6, 6, zr_reg);
-   //    write_code_2("LDC", zr_reg, 0, zr_reg);
-   // }
+   Symb *no = *head;
+   std::stack<Symb*> noStack;
+   while(no != nullptr){
+      noStack.push(no);
+      no = no->next;
+   }
+   while(!noStack.empty() && noStack.top()->nivel == num){
+      free(noStack.top());
+      noStack.pop();
+      localVarBytes -= 1;
+      write_code_2("LDC", zr_reg, 1, zr_reg);
+      write_code_1("SUB", 6, 6, zr_reg);
+      write_code_2("LDC", zr_reg, 0, zr_reg);
+   }
+   if(noStack.empty()){
+      *head = nullptr;
+   } else{
+      noStack.top()->next = nullptr;
+   }
 }
 
 void removeRegOrTmp(RegOrTmp* val){
    if(val->num < 0){
-      // simbleTable1[val->tmp_var_name]->used = true;
-      // while(!simbleTable2.empty() && simbleTable2.back()->used == true && simbleTable2.back()->isTmp == true){
-      //    if(isInFunction){
-      //       localVarBytes -= simbleTable2.back()->size;
-      //    } else{
-      //       globalVarBytes -= simbleTable2.back()->size;
-      //    }
-      //    simbleTable1.erase(simbleTable2.back()->name);
-      //    simbleTable2.pop_back();
-      //    write_code_2("LDC", zr_reg, 1, zr_reg);
-      //    write_code_1("SUB", 6, 6, zr_reg);
-      //    write_code_2("LDC", zr_reg, 0, zr_reg);
-      // }
+      find(strdup(val->tmp_var_name.c_str()), head)->usado = 1;
+      Symb *no = *head;
+      std::stack<Symb*> noStack;
+      while(no != nullptr){
+         noStack.push(no);
+         no = no->next;
+      }
+      while(!noStack.empty() && noStack.top()->usado == 1){
+         free(noStack.top());
+         noStack.pop();
+         localVarBytes -= 1;
+         write_code_2("LDC", zr_reg, 1, zr_reg);
+         write_code_1("SUB", 6, 6, zr_reg);
+         write_code_2("LDC", zr_reg, 0, zr_reg);
+      }
+      if(noStack.empty()){
+         *head = nullptr;
+      } else{
+         noStack.top()->next = nullptr;
+      }
    } else{
       if(0 < val->num && val->num < 6){
          int reg_orig = val->num;
@@ -131,9 +145,10 @@ int getRegNumfromRegOrTmp(RegOrTmp* val){
 
    if(val->num < 0){
       int reg_dest = registers_used.front()->num;
+      registers_used.front()->num = -1;
       registers_used.front()->tmp_var_name = "$" + std::to_string(last_tmp_var);
       
-      append_new(strdup(registers_used.front()->tmp_var_name.c_str()), localVarBytes, 1, head); 
+      append_new(strdup(registers_used.front()->tmp_var_name.c_str()), localVarBytes, 1, level, head); 
 
       write_code_2("LDC", 0, 1, zr_reg);
       write_code_1("ADD", sp_reg, sp_reg, zr_reg);
@@ -171,7 +186,7 @@ RegOrTmp* getRegOrTmp(){
       int reg_dest = registers_used.front()->num;
       registers_used.front()->tmp_var_name = "$" + std::to_string(last_tmp_var);
       
-      append_new(strdup(registers_used.front()->tmp_var_name.c_str()), localVarBytes, 1, head); 
+      append_new(strdup(registers_used.front()->tmp_var_name.c_str()), localVarBytes, 1, level, head); 
 
       write_code_2("LDC", 0, 1, zr_reg);
       write_code_1("ADD", sp_reg, sp_reg, zr_reg);
@@ -245,7 +260,7 @@ var_decl:   type_spec ID                    {
       write_code_2("LDC", 0, 1, zr_reg);
       write_code_1("ADD", 6, 6, zr_reg);
       write_code_2("LDC", 0, 0, zr_reg);
-      append_new($2, localVarBytes, $1, head);   
+      append_new($2, localVarBytes, $1, level, head);   
       $$ = localVarBytes;
       localVarBytes += 1;
    }
@@ -277,7 +292,7 @@ func_stmt:   write_func SEMI {}
             ; 
 
 write_func: ESCREVER LPAREN expr RPAREN     { 
-   // printf("\t%f\n", $3); 
+   printf("\t%f\n", $3); 
    write_code_1("OUT", $3->num, zr_reg, zr_reg);
 
    removeRegOrTmp($3);
@@ -292,7 +307,7 @@ assign_stmt:    assign SEMI         {printf("atribuicao stmt\n");}
                 ;
 
 assign: ID ASSIGN expr              {
-   // printf("atribuicao 1\n");
+   printf("atribuicao 1\n");
    int reg_orig = getRegNumfromRegOrTmp($3);
    auto var_data = find($1, head);
 
@@ -301,7 +316,7 @@ assign: ID ASSIGN expr              {
    removeRegOrTmp($3);
 }
         | var_decl ASSIGN expr      { 
-   // printf("atribuicao 2\n");
+   printf("atribuicao 2\n");
    
    int reg_orig = getRegNumfromRegOrTmp($3);
 
@@ -343,18 +358,42 @@ iteration_stmt: WHILE {
    write_code_2("JEQ", num_reg_1, 0, pc_reg);
    removeRegOrTmp($4);
 } LBRACE stmt_list RBRACE                                    {
-   // printf("while\n");
-
+   printf("while\n");
    removeLevel(level);
    level--; 
-   code[conditionArg.top()].arg2 = code.size() - conditionArg.top();
-   printf("code[conditionArg.top()].arg2 = %d\n", code[conditionArg.top()].arg2);
-   conditionArg.pop();
    write_code_2("JEQ", zr_reg, codeSizeStack.top() - code.size() - 1, pc_reg);
    codeSizeStack.pop();
+   code[conditionArg.top()].arg2 = code.size() - conditionArg.top() - 1;
+   conditionArg.pop();
 }
-                | FOR LPAREN assign SEMI expr SEMI assign RPAREN LBRACE stmt_list RBRACE            {
+                | FOR {
+   level++;
+} LPAREN assign {
+   codeSizeStack.push(code.size()); // 4 <-
+} SEMI expr {
+   int num_reg_1 = getRegNumfromRegOrTmp($7);
+   conditionArg.push(code.size());
+   write_code_2("JEQ", num_reg_1, 0, pc_reg); // 1 ->
+   removeRegOrTmp($7);
+   conditionArg.push(code.size());
+   write_code_2("JEQ", zr_reg, 0, pc_reg); // 2 ->
+   codeSizeStack.push(code.size()); // 3 <-
+} SEMI assign{
+   int aux = codeSizeStack.top();
+   codeSizeStack.pop();
+   write_code_2("JEQ", zr_reg, codeSizeStack.top() - code.size() - 1, pc_reg); // 4 ->
+   codeSizeStack.pop();
+   codeSizeStack.push(aux);
+   code[conditionArg.top()].arg2 = code.size() - conditionArg.top() - 1; // 2 <-
+   conditionArg.pop();
+} RPAREN LBRACE stmt_list RBRACE            {
    printf("for\n");
+   removeLevel(level);
+   level--; 
+   write_code_2("JEQ", zr_reg, codeSizeStack.top() - code.size() - 1, pc_reg); // 3 ->
+   codeSizeStack.pop();
+   code[conditionArg.top()].arg2 = code.size() - conditionArg.top() - 1; // 1 <-
+   conditionArg.pop();
 }
                 ;
 
@@ -369,7 +408,7 @@ return_stmt:    RET SEMI                    {
 
 
 expr:   logical_expr relop logical_expr       {
-   // printf("logical_expr RELOP logical_expr\n");
+   printf("logical_expr RELOP logical_expr\n");
    int num_reg_1 = getRegNumfromRegOrTmp($1);
    int num_reg_2 = getRegNumfromRegOrTmp($3);
    write_code_1("SUB", num_reg_1, num_reg_1, num_reg_2);
@@ -397,37 +436,37 @@ expr:   logical_expr relop logical_expr       {
         /* | expr logical_op expr      {printf("expr logical_op expr\n");} */
         /* | expr relop expr           {printf("expr relop expr\n");} */
         | logical_expr                        {
-   // printf("logical_expr\n");
+   printf("logical_expr\n");
    $$ = $1;
 }
         ;
 
 logical_expr:   logical_expr AND unary_expr     {
-   // printf("logical_exp AND unary_expr\n");
+   printf("logical_exp AND unary_expr\n");
 }
                 | logical_expr OR unary_expr    {
-   // printf("logical_exp OR unary_expr\n");
+   printf("logical_exp OR unary_expr\n");
 }
                 | unary_expr                    {
-   // printf("unary_expr\n");
+   printf("unary_expr\n");
    $$ = $1;
 }
                 ;
 
 unary_expr: NOT simple_expr                     {
-   // printf("NOT simple_expr\n");
+   printf("NOT simple_expr\n");
    int num_reg_1 = getRegNumfromRegOrTmp($2);
    write_code_1("SUB", num_reg_1, zr_reg, num_reg_1);
    $$ = $2;
 }
             | simple_expr                       {
-   // printf("simple_expr\n");
+   printf("simple_expr\n");
    $$ = $1;
 }
             ;
 
 simple_expr:    simple_expr PLUS term           {
-   // printf("simple_expr PLUS term\n");
+   printf("simple_expr PLUS term\n");
 
    int num_reg_1 = getRegNumfromRegOrTmp($1);
    int num_reg_2 = getRegNumfromRegOrTmp($3);
@@ -436,7 +475,7 @@ simple_expr:    simple_expr PLUS term           {
    $$ = $1;
 }
                 | simple_expr MINUS term        {
-   // printf("simple_expr MINUS term\n");
+   printf("simple_expr MINUS term\n");
    int num_reg_1 = getRegNumfromRegOrTmp($1);
    int num_reg_2 = getRegNumfromRegOrTmp($3);
    write_code_1("SUB", num_reg_1, num_reg_1, num_reg_2);
@@ -444,14 +483,16 @@ simple_expr:    simple_expr PLUS term           {
    $$ = $1;
 }
                 | term                          {
-   // printf("term\n");
+   printf("term\n");
    $$ = $1;
 }
                 ;
 
 term:   term MUL factor                         {
-   // printf("term MUL factor\n");
+   printf("term MUL factor\n");
 
+   printf("livres_qtd = %d\n", registers_libre.size());
+   printf("used_qtd = %d\n", registers_used.size());
    int num_reg_1 = getRegNumfromRegOrTmp($1);
    int num_reg_2 = getRegNumfromRegOrTmp($3);
    write_code_1("MUL", num_reg_1, num_reg_1, num_reg_2);
@@ -459,7 +500,7 @@ term:   term MUL factor                         {
    $$ = $1;
 }
         | term DIV factor                       {
-   // printf("term DIV factor\n");
+   printf("term DIV factor\n");
    int num_reg_1 = getRegNumfromRegOrTmp($1);
    int num_reg_2 = getRegNumfromRegOrTmp($3);
    write_code_1("DIV", num_reg_1, num_reg_1, num_reg_2);
@@ -472,10 +513,11 @@ term:   term MUL factor                         {
         ;
 
 factor: LPAREN expr RPAREN                      {
-   // printf("(expr)\n");
+   printf("(expr)\n");
+   $$ = $2;
 }
         | NUM                                   {
-   // printf("num\n");
+   printf("num\n");
    auto regTmp = getRegOrTmp(); 
    int reg_dest = regTmp->num;
    $$ = regTmp;
@@ -483,13 +525,13 @@ factor: LPAREN expr RPAREN                      {
    write_code_2("LDC", reg_dest, $1, zr_reg);
 }
         | ID                                    {
-   // printf("id\n");
+   printf("id\n");
 
    auto regTmp = getRegOrTmp(); 
    int reg_dest = regTmp->num;
    $$ = regTmp;
    auto var_data = find($1, head);
-   // printf("%p\n", var_data);
+   printf("%p\n", var_data);
 
    write_code_2("LD", reg_dest, var_data->loc - localVarBytes, sp_reg);
 }
@@ -568,7 +610,7 @@ void yyerror(const char *msg) {
    printf("** Line %d: %s\n", lineno, msg);
 }
 
-void append_new(char* name, int location, int type, Symb** head){
+void append_new(char* name, int location, int type, int nivel, Symb** head){
 	struct Symb* newNode = (struct Symb*)malloc(sizeof(struct Symb));
 	
 	if (type == 0) {
@@ -582,6 +624,7 @@ void append_new(char* name, int location, int type, Symb** head){
 	newNode->loc = location;
 	newNode->usado = 0;
 	newNode->type = type;
+	newNode->nivel = nivel;
 	newNode->next = nullptr;
  
 	if (*head == nullptr) {
