@@ -234,6 +234,7 @@ RegOrTmp* getRegOrTmp(){
 }
 
 %}
+// #################end of code block############################# /
 
 %union{
    double dval;
@@ -655,7 +656,7 @@ int main(int argc, char **argv) {
    if (argc > 1) {
       yyin = fopen(argv[argc-1], "r");
       if (yyin == NULL){
-         printf("syntax: %s filename\n", argv[0]);
+         printf("Error opening file: %s\n", argv[argc-1]);
       }
 
       for(int i = 1; i < argc; i++) {
@@ -674,8 +675,10 @@ int main(int argc, char **argv) {
    used(head, VarUsadas);
    printTS(head);
 
-   writeAsm(); 
-
+   writeAsm();
+    
+   fclose(yyin);
+   yylex_destroy();
    return 0;
 }
 

@@ -582,5 +582,6 @@ main( int argc, char * argv[] )
      done = ! doCommand ();
   while (! done );
   printf("Simulation done.\n");
+  fclose(pgm);
   return 0;
 }
