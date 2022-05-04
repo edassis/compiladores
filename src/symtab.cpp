@@ -9,8 +9,11 @@ char* nome;
 struct Symb* teste;
 struct Symb* achei;
 struct Symb* elem;
+struct ExisteVar* usadas;
 
 struct Symb** head = cria_lista();
+
+struct ExisteVar** VarUsadas = cria_lista_var();
 
 void append_new(char* name, int location, int type, int nivel, Symb** head){
 	struct Symb* newNode = (struct Symb*)malloc(sizeof(struct Symb));
@@ -71,27 +74,41 @@ Symb* find(char* name, Symb** head){
 	return nullptr; 
 }
 
-void used(char* name, Symb** head){
-	exist = 0;
+void used(Symb** head, ExisteVar** VarUsadas){
+	//exist = 0;
 
 	if (*head == nullptr){
 		return;
 	}
 	
+	if (*VarUsadas == nullptr){
+		return;
+	}
+	
 	struct Symb *elem = *head; 
-	while ((elem != nullptr)){
-		if (strcmp(elem->name, name) == 0){
-			elem->usado = 1;
-			exist = 1;
-			return;
-		} else {
-			elem = elem->next;
+	struct ExisteVar *usadas = *VarUsadas;
+	while (elem != nullptr){
+		while ((usadas != nullptr)){
+			if (strcmp(elem->name, usadas->name) == 0){
+					elem->usado = 1;
+			}
+			usadas = usadas->next;
+		}
+		usadas = *VarUsadas;
+		elem = elem->next;
+	}
+	
+	elem = *head;
+ 	while (elem != nullptr) {
+ 		if(elem->usado != 1){
+ 			printf("Erro: Uso de variável '%s' não Declarada!\n", elem->name);
+ 			return;
+ 		} else {
+ 			elem = elem->next;
 		}
 	}
 	
-	if (exist != 1) {
-		printf("Erro: Uso ne variável '%s' não Declarada!\n", name);
-	}	
+	return;	
 }
 
 void printTS(Symb** head){
@@ -118,6 +135,13 @@ void printTS(Symb** head){
 		elem = elem->next;
 	}
 	printf("\n");
+	
+	//printf("Lista:\n");
+	//struct ExisteVar *elem1 = *VarUsadas; 
+	//while ((elem1 != nullptr)){
+	//	printf("%s\t", elem1->name);
+	//	elem1=elem1->next;
+	//}
 }
 
 Symb** cria_lista(){
@@ -125,5 +149,32 @@ Symb** cria_lista(){
   if(li == nullptr) return 0;
   *li = nullptr;
   return li;
+}
+
+ExisteVar** cria_lista_var(){
+  ExisteVar** li=(ExisteVar**) malloc(sizeof(ExisteVar*));
+  if(li == nullptr) return 0;
+  *li = nullptr;
+  return li;
+}
+
+void var_append(char* name, ExisteVar** VarUsadas){
+	struct ExisteVar* newNode = (struct ExisteVar*)malloc(sizeof(struct ExisteVar));
+   /* printf("%s\n", name); */
+ 	newNode->name = name;
+	newNode->next = nullptr;
+ 
+	if (*VarUsadas == nullptr) {
+		*VarUsadas = newNode;
+		return;
+	} else {
+		struct ExisteVar *last = *VarUsadas;
+ 		while (last->next != nullptr) {
+				last = last->next;
+		}
+
+		last->next = newNode;
+		return;
+	}
 }
 

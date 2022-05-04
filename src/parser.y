@@ -284,6 +284,8 @@ var_decl:   type_spec ID                    {
       $$ = localVarBytes;
       localVarBytes += 1;
    }
+   
+   var_append($2, VarUsadas);
 }
             ;
 
@@ -352,6 +354,8 @@ assign: ID ASSIGN expr              {
    write_code_2("ST", reg_orig, var_data->loc - localVarBytes, sp_reg);
    
    removeRegOrTmp($3);
+   
+   var_append($1, VarUsadas);
 }
         | var_decl ASSIGN expr      { 
    // printf("atribuicao 2\n");
@@ -656,6 +660,9 @@ int main(int argc, char **argv) {
    }
 
    yyparse(); // Calls yylex() for tokens.
+   
+   used(head, VarUsadas);
+   printTS(head);
 
    writeAsm(); 
 
