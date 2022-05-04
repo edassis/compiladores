@@ -94,7 +94,6 @@ void deleteUsados(){
    std::stack<Symb*> noStack;
    while(no != nullptr){
       noStack.push(no);
-      printf("name = %s\n", no->name);
       no = no->next;
    }
    while(!noStack.empty() && noStack.top()->usado == 1){
@@ -448,6 +447,7 @@ iteration_stmt: WHILE {
                 | FOR {
    level++;
 } LPAREN assign {
+   level++;
    codeSizeStack.push(code.size()); // 4 <-
 } SEMI expr {
    int num_reg_1 = getRegNumfromRegOrTmp($7);
@@ -473,6 +473,8 @@ iteration_stmt: WHILE {
    codeSizeStack.pop();
    code[conditionArg.top()].arg2 = code.size() - conditionArg.top() - 1; // 1 <-
    conditionArg.pop();
+   removeLevel(level);
+   level--; 
 }
                 ;
 
@@ -657,9 +659,12 @@ int main(int argc, char **argv) {
             break;
          }
       }
+      yyparse(); // Calls yylex() for tokens.
+      fclose(yyin);
+   } else{
+      yyparse(); // Calls yylex() for tokens.
    }
 
-   yyparse(); // Calls yylex() for tokens.
    
    used(head, VarUsadas);
    printTS(head);
@@ -685,5 +690,7 @@ void writeAsm() {
          res += std::to_string(v.line) + ": " + v.opCode + " " + std::to_string(v.arg1) + ", " + std::to_string(v.arg2) + "(" + std::to_string(v.arg3) + ")\n";
       }
    }
-   printf("%s\n", res.c_str());
+   FILE *file = fopen("out.tm", "w");
+   fprintf(file, "%s\n", res.c_str());
+   fclose(file);
 }

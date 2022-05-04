@@ -1,8 +1,16 @@
 
 int n = ler();
 int fat = 1;
-while(n != 0){
-    fat = fat * n;
-    n = n - 1;
-}
-escrever(fat);
+if(n < 0){
+    escrever(!1);
+} else{
+    if(n > 12){
+        escrever(!1);
+    } else{
+        while(n != 0){
+            fat = fat * n;
+            n = n - 1;
+        }
+        escrever(fat);
+    }
+} 
