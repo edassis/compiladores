@@ -51,6 +51,10 @@ int level = 0;
 
 int localVarBytes = 0;
 
+void eat_to_nextStmt() {
+   int c;
+   while((c = getchar()) != '\0' && c != ';');
+}
 
 bool isInFunction(){
    return level != 0;
@@ -141,7 +145,7 @@ int getRegNumfromRegOrTmp(RegOrTmp* val){
          registers_used.front()->num = -1; 
          registers_used.front()->tmp_var_name = "$" + std::to_string(last_tmp_var);
          last_tmp_var++;
-         printf("%s\n", registers_used.front()->tmp_var_name.c_str());
+         /* printf("%s\n", registers_used.front()->tmp_var_name.c_str()); */
          
          append_new(strdup(registers_used.front()->tmp_var_name.c_str()), localVarBytes, 1, level, head); 
 
@@ -264,7 +268,6 @@ program: stmt_list                            {}
 
 stmt_list:  %empty
             | stmt_list stmt
-            | error              { yyerrok; }
             ;
 
 decl_stmt:  decl SEMI
@@ -295,6 +298,8 @@ stmt:   decl_stmt                               {}
         | selection_stmt                        {}
         | iteration_stmt                        {}
         | return_stmt                           {}
+        /* | error              { eat_to_nextStmt(); yyerrok; yyclearin; } */
+        | error SEMI              { yyerrok; yyclearin; }
         ;
 
 
@@ -681,7 +686,7 @@ void yyerror(const char *msg) {
 
 void writeAsm() {
    write_code_1("HALT",0,0,0);   // End program execution
-
+    
    std::string res;
    for(auto v : code){
       if(v.type == 1){

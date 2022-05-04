@@ -45,4 +45,3 @@ void printTS(Symb** head);
 Symb** cria_lista();
 ExisteVar** cria_lista_var();
 void var_append(char*name, ExisteVar** VarUsadas);
-
