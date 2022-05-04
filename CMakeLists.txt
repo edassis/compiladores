@@ -26,8 +26,8 @@ bison_target(PARSER ${CMAKE_CURRENT_SOURCE_DIR}/src/parser.y ${CMAKE_CURRENT_BIN
 add_flex_bison_dependency(LEXER PARSER)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-add_executable(a ${BISON_PARSER_OUTPUTS} ${FLEX_LEXER_OUTPUTS})
-# target_sources(MyScanner PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_executable(a ${BISON_PARSER_OUTPUTS} ${FLEX_LEXER_OUTPUTS} src/symtab.cpp)
+# target_sources(a PRIVATE ${PROJECT_SOURCE_DIR}/src)
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 # include_directories(${CMAKE_CURRENT_BINARY_DIR})
 # target_include_directories(a PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

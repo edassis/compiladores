@@ -28,6 +28,7 @@
 #include <stack>
 #include <vector>
 #include "lexer.hpp"
+#include "symtab.h"
 #include "parser.hpp"
 #include "globals.h"
 #include <set>
@@ -35,22 +36,7 @@
 #include <map>
 
 
-void append_new(char* name, int location, int type, Symb** head);
-Symb* find(char* name, Symb** head);
-void used(char* name, Symb** head);
-void printTS(Symb** head);
-Symb** cria_lista();
 
-
-int exist=0;
-
-char* nome;
-
-struct Symb* teste;
-struct Symb* achei;
-struct Symb* elem;
-
-struct Symb** head = cria_lista();
 
 
 
@@ -275,7 +261,7 @@ RegOrTmp* getRegOrTmp(){
 %token <text> STRCON
 
 %type <ival> type_spec var_decl relop
-%type <reg_tmp> expr logical_expr unary_expr simple_expr term factor read_func func write_func
+%type <reg_tmp> expr unary_expr simple_expr term factor read_func func write_func
 
 %% 
 program: stmt_list                            {}
@@ -673,13 +659,22 @@ type_spec:  INT {
 
 int lineno = 0;
 
+bool debug = false;
+
 void writeAsm();
 
 int main(int argc, char **argv) {
    if (argc > 1) {
-      yyin = fopen(argv[1], "r");
+      yyin = fopen(argv[argc-1], "r");
       if (yyin == NULL){
          printf("syntax: %s filename\n", argv[0]);
+      }
+
+      for(int i = 1; i < argc; i++) {
+         if(std::string(argv[i]).find("-d") != std::string::npos) {
+            debug = true;
+            break;
+         }
       }
    }
 
@@ -692,123 +687,6 @@ int main(int argc, char **argv) {
 
 void yyerror(const char *msg) {
    printf("** Line %d: %s\n", lineno, msg);
-}
-
-void append_new(char* name, int location, int type, int nivel, Symb** head){
-	struct Symb* newNode = (struct Symb*)malloc(sizeof(struct Symb));
-   /* printf("%s\n", name); */
-	if (type == 0) {
-		newNode->size = 0;
-	}
-	if (type == 1) {
-		newNode->size = 4;
-	}
- 	
- 	newNode->name = name;
-	newNode->loc = location;
-	newNode->usado = 0;
-	newNode->type = type;
-	newNode->nivel = nivel;
-	newNode->next = nullptr;
- 
-	if (*head == nullptr) {
-		*head = newNode;
-		return;
-	} else {
-		struct Symb *last = *head;
- 		while (last->next != nullptr) {
- 			if(strcmp(last->name, name) != 0){
-				last = last->next;
-			} else {
-				printf("ERRO SEMÂNTICO: VARIÁVEL '%s' JÁ EXISTE!\n", last->name);
-				return;
-			}
-		}
-		if(strcmp(last->name, name) != 0){
-		} else {
-			printf("ERRO SEMÂNTICO: VARIÁVEL '%s' JÁ EXISTE!\n", last->name);
-			return;
-		}
-		last->next = newNode;
-		return;
-	}
-}
-
-Symb* find(char* name, Symb** head){
-	if (*head == nullptr){
-		return nullptr;
-	}
- 
-	struct Symb *elem = *head; 
-
-	while (elem != nullptr){
-      /* printf("name = %s\n", name);
-      printf("elem->name = %s\n", elem->name); */
-		if (strcmp(elem->name, name) == 0){
-			return elem;
-		} else {
-			elem = elem->next;
-		}
-	}
-	return nullptr; 
-}
-
-void used(char* name, Symb** head){
-	exist = 0;
-
-	if (*head == nullptr){
-		return;
-	}
-	
-	struct Symb *elem = *head; 
-	while ((elem != nullptr)){
-		if (strcmp(elem->name, name) == 0){
-			elem->usado = 1;
-			exist = 1;
-			return;
-		} else {
-			elem = elem->next;
-		}
-	}
-	
-	if (exist != 1) {
-		printf("ERRO: USO DE VARIÁVEL '%s' NÃO DECLARADA!\n", name);
-	}	
-	return; 
-}
-
-void printTS(Symb** head){
-	if (*head == nullptr){
-		printf("Tabela vazia\n");
-		return;
-	}
- 
- 	printf("TABELA DE SÍMBOLOS: \n");
-	struct Symb *elem = *head; 
-	while ((elem != nullptr)){
-		printf("%s\t", elem->name);
-		printf("%d\t", elem->size);
-		printf("%d\t", elem->loc);
-		if (elem->usado == 0)
-			printf("não utilizado\t");
-		if(elem->usado == 1)
-			printf("utilizado\t");
-		if (elem->type == 0)
-			printf("void\t");
-		if(elem->type == 1)
-			printf("int\t");
-		printf("\n");
-		elem = elem->next;
-	}
-		printf("\n");
-	return; 
-}
-
-Symb** cria_lista(){
-  Symb** li=(Symb**) malloc(sizeof(Symb*));
-  if(li == nullptr) return 0;
-  *li = nullptr;
-  return li;
 }
 
 
