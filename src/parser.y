@@ -36,10 +36,6 @@
 #include <map>
 
 
-
-
-
-
 std::stack<int> codeSizeStack;
 std::stack<int> conditionArg;
 
@@ -269,11 +265,8 @@ program: stmt_list                            {}
 
 stmt_list:  %empty
             | stmt_list stmt
+            | error              { yyerrok; }
             ;
-
-    /* decl_list:  %empty */
-    /*             | decl_list decl */
-    /*             ; */
 
 decl_stmt:  decl SEMI
             ;
@@ -294,9 +287,6 @@ var_decl:   type_spec ID                    {
 }
             ;
 
-/* local_decl: %empty 
-            | local_decl decl
-            ; */
 
 stmt:   decl_stmt                               {}
         | assign_stmt                           {}
@@ -304,12 +294,7 @@ stmt:   decl_stmt                               {}
         | selection_stmt                        {}
         | iteration_stmt                        {}
         | return_stmt                           {}
-        /* | compound_stmt                         {} */
         ;
-
-     /* Permitir escopo */ 
-    /* compound_stmt:  LBRACE local_decl stmt_list RBRACE */
-    /*                 ; */
 
 
 
@@ -402,14 +387,6 @@ assign: ID ASSIGN expr              {
 }
         ;
 
-
-    /* params: %empty */
-    /*         | param_list */
-    /*         ; */
-
-    /* param_list:  var_decl                        {} */
-    /*             | parm_list COMMA var_decl       {}  */
-    /*             ; */
 
 if_init:  IF {
    level++;
@@ -691,8 +668,8 @@ void yyerror(const char *msg) {
 
 
 void writeAsm() {
-   code.push_back(AsmLine{9, "HALT", 1, 0, 0, 0});   
-   
+   write_code_1("HALT",0,0,0);   // End program execution
+
    std::string res;
    for(auto v : code){
       if(v.type == 1){
