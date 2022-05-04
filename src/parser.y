@@ -699,6 +699,6 @@ void writeAsm() {
       }
    }
    FILE *file = fopen("out.tm", "w");
-   fprintf(file, "%s\n", res.c_str());
+   fprintf(file, "%s", res.c_str());
    fclose(file);
 }
