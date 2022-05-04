@@ -676,8 +676,6 @@ int main(int argc, char **argv) {
    printTS(head);
 
    writeAsm();
-    
-   fclose(yyin);
    yylex_destroy();
    return 0;
 }
