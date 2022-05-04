@@ -288,7 +288,7 @@ var_decl:   type_spec ID                    {
       localVarBytes += 1;
    }
    
-   var_append($2, VarUsadas);
+   //var_append($2, VarUsadas);
 }
             ;
 

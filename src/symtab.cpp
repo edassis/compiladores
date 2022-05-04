@@ -101,7 +101,7 @@ void used(Symb** head, ExisteVar** VarUsadas){
 	elem = *head;
  	while (elem != nullptr) {
  		if(elem->usado != 1){
- 			printf("Erro: Uso de variável '%s' não Declarada!\n", elem->name);
+ 			printf("Erro: Variável %s usada e não declarada.\n", elem->name);
  			return;
  		} else {
  			elem = elem->next;

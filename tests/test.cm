@@ -1,5 +1,6 @@
 
 int n = ler();
+int a;
 int fat = 1;
 if(n < 0){
     escrever(!1);
