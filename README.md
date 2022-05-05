@@ -1,10 +1,10 @@
 # Compiladores
 
 Group:
-- [Eduardo F. Assis](@edassis): Análise léxica e sintática;
-- [Carlos Gabriel V. N. Soares](@gabuvns): Análise sintática;
-- [Maria Julia Dias Lima](@majuhdl): Análise semântica;
-- [Oscar E. B. M. Silva](@Oscar2019): Geração de código.
+- [Eduardo F. Assis](https://github.com/edassis): Análise léxica e sintática;
+- [Carlos Gabriel V. N. Soares](https://github.com/gabuvns): Análise sintática;
+- [Maria Julia Dias Lima](https://github.com/majuhdl): Análise semântica;
+- [Oscar E. B. M. Silva](https://github.com/Oscar2019): Geração de código.
 
 ## Build
 
