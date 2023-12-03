@@ -1,5 +1,7 @@
 # Compiladores
 
+A prototype compiler that outputs an intermediate code for the 'TM' VM.
+
 Group:
 - [Eduardo F. Assis](https://github.com/edassis): Lexical and syntactic analysis;
 - [Carlos Gabriel V. N. Soares](https://github.com/gabuvns): Syntactic analysis;
